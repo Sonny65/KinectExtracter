@@ -8,6 +8,13 @@
 #include <strsafe.h>
 #include "resource.h"
 #include "ColorBasics.h"
+#include <typeinfo>
+#include <iostream>
+#include <string>
+#include <fstream>
+using namespace std;
+
+ofstream outFile;  //default IO file. Replaces items in file. If file does not exist creates new file
 
 static const float c_JointThickness = 3.0f;
 static const float c_TrackedBoneThickness = 6.0f;
@@ -32,7 +39,9 @@ int APIENTRY wWinMain(
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+	//ofstream outFile;  //default IO file. Replaces items in file. If file does not exist creates new file
     CColorBasics application;
+
     application.Run(hInstance, nShowCmd);
 }
 
@@ -238,7 +247,6 @@ void CColorBasics::Update()
 	// Process BodyFrame
 	if (!m_pBodyFrameReader)
 	{
-		OutputDebugString(L"OHHHHHHHHHHHHHH");
 		return;
 	}
 	
@@ -514,8 +522,8 @@ void CColorBasics::ProcessBody(INT64 nTime, int nBodyCount, IBody** ppBodies)
 
 		if (SUCCEEDED(hr) && m_pRenderTarget && m_pCoordinateMapper)
 		{
-			m_pRenderTarget->BeginDraw();
-			m_pRenderTarget->Clear();
+			/*m_pRenderTarget->BeginDraw();
+			m_pRenderTarget->Clear();*/
 
 			RECT rct;
 			GetClientRect(GetDlgItem(m_hWnd, IDC_VIDEOVIEW), &rct);
@@ -550,25 +558,25 @@ void CColorBasics::ProcessBody(INT64 nTime, int nBodyCount, IBody** ppBodies)
 
 							DrawBody(joints, jointPoints);
 
-							DrawHand(leftHandState, jointPoints[JointType_HandLeft]);
-							DrawHand(rightHandState, jointPoints[JointType_HandRight]);
+							/*DrawHand(leftHandState, jointPoints[JointType_HandLeft]);
+							DrawHand(rightHandState, jointPoints[JointType_HandRight]);*/
 						}
 					}
 				}
 			}
 
-			hr = m_pRenderTarget->EndDraw();
+			/*hr = m_pRenderTarget->EndDraw();*/
 
 			// Device lost, need to recreate the render target
 			// We'll dispose it now and retry drawing
-			if (D2DERR_RECREATE_TARGET == hr)
+			/*if (D2DERR_RECREATE_TARGET == hr)
 			{
 				hr = S_OK;
 				DiscardDirect2DResources();
-			}
+			}*/
 		}
 
-		if (!m_nStartTime)
+		/*if (!m_nStartTime)
 		{
 			m_nStartTime = nTime;
 		}
@@ -595,7 +603,7 @@ void CColorBasics::ProcessBody(INT64 nTime, int nBodyCount, IBody** ppBodies)
 		{
 			m_nLastCounter = qpcNow.QuadPart;
 			m_nFramesSinceUpdate = 0;
-		}
+		}*/
 	}
 }
 /// <summary>
@@ -844,7 +852,7 @@ void CColorBasics::DrawBody(const Joint* pJoints, const D2D1_POINT_2F* pJointPoi
 	DrawBone(pJoints, pJointPoints, JointType_AnkleLeft, JointType_FootLeft);
 
 	// Draw the joints
-	for (int i = 0; i < JointType_Count; ++i)
+	/*for (int i = 0; i < JointType_Count; ++i)
 	{
 		D2D1_ELLIPSE ellipse = D2D1::Ellipse(pJointPoints[i], c_JointThickness, c_JointThickness);
 
@@ -856,7 +864,7 @@ void CColorBasics::DrawBody(const Joint* pJoints, const D2D1_POINT_2F* pJointPoi
 		{
 			m_pRenderTarget->FillEllipse(ellipse, m_pBrushJointTracked);
 		}
-	}
+	}*/
 }
 
 /// <summary>
@@ -887,11 +895,19 @@ void CColorBasics::DrawBone(const Joint* pJoints, const D2D1_POINT_2F* pJointPoi
 	// We assume all drawn bones are inferred unless BOTH joints are tracked
 	if ((joint0State == TrackingState_Tracked) && (joint1State == TrackingState_Tracked))
 	{
-		m_pRenderTarget->DrawLine(pJointPoints[joint0], pJointPoints[joint1], m_pBrushBoneTracked, c_TrackedBoneThickness);
+		//m_pRenderTarget->DrawLine(pJointPoints[joint0], pJointPoints[joint1], m_pBrushBoneTracked, c_TrackedBoneThickness);
+		ofstream myfile;
+		myfile.open("example.txt");
+		myfile << pJointPoints[joint0].x;
+		myfile.close();
 	}
 	else
 	{
-		m_pRenderTarget->DrawLine(pJointPoints[joint0], pJointPoints[joint1], m_pBrushBoneInferred, c_InferredBoneThickness);
+		//m_pRenderTarget->DrawLine(pJointPoints[joint0], pJointPoints[joint1], m_pBrushBoneInferred, c_InferredBoneThickness);
+		ofstream myfile;
+		myfile.open("example.txt");
+		myfile << pJointPoints[joint0].x;
+		myfile.close();
 	}
 }
 

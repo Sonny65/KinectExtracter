@@ -174,6 +174,12 @@ private:
 	void                    DrawBody(const Joint* pJoints, const D2D1_POINT_2F* pJointPoints);
 
 	/// <summary>
+	/// Output Joints
+	/// </summary>
+	/// <param name="pJoints">joint data</param>
+	void                    OutputJoints(const Joint pJoints);
+
+	/// <summary>
 	/// Draws a hand symbol if the hand is tracked: red circle = closed, green circle = opened; blue circle = lasso
 	/// </summary>
 	/// <param name="handState">state of the hand</param>

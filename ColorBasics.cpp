@@ -20,6 +20,8 @@ static const float c_JointThickness = 3.0f;
 static const float c_TrackedBoneThickness = 6.0f;
 static const float c_InferredBoneThickness = 1.0f;
 static const float c_HandSize = 30.0f;
+int FrameNumber = 0;
+boolean tracked = false;
 
 /// <summary>
 /// Entry point for the application
@@ -36,6 +38,89 @@ int APIENTRY wWinMain(
     _In_ int nShowCmd
     )
 {
+	char name[256] = { '\0' };
+	sprintf(name, "datapoints.csv");
+
+	outFile = ofstream(name);
+	// Write the header -- Joint Position
+	outFile << "Frame_Number" << ",";
+	outFile << "Time_Stamp" << ",";
+	outFile << "SpineBase_x" << ",";
+	outFile << "SpineBase_y" << ",";
+	outFile << "SpineBase_z" << ",";
+	outFile << "SpineMid_x" << ",";
+	outFile << "SpineMid_y" << ",";
+	outFile << "SpineMid_z" << ",";
+	outFile << "Neck_x" << ",";
+	outFile << "Neck_y" << ",";
+	outFile << "Neck_z" << ",";
+	outFile << "Head_x" << ",";
+	outFile << "Head_y" << ",";
+	outFile << "Head_z" << ",";
+	outFile << "ShoulderLeft_x" << ",";
+	outFile << "ShoulderLeft_y" << ",";
+	outFile << "ShoulderLeft_z" << ",";
+	outFile << "ElbowLeft_x" << ",";
+	outFile << "ElbowLeft_y" << ",";
+	outFile << "ElbowLeft_z" << ",";
+	outFile << "WristLeft_x" << ",";
+	outFile << "WristLeft_y" << ",";
+	outFile << "WristLeft_z" << ",";
+	outFile << "HandLeft_x" << ",";
+	outFile << "HandLeft_y" << ",";
+	outFile << "HandLeft_z" << ",";
+	outFile << "ShoulderRight_x" << ",";
+	outFile << "ShoulderRight_y" << ",";
+	outFile << "ShoulderRight_z" << ",";
+	outFile << "ElbowRight_x" << ",";
+	outFile << "ElbowRight_y" << ",";
+	outFile << "ElbowRight_z" << ",";
+	outFile << "WristRight_x" << ",";
+	outFile << "WristRight_y" << ",";
+	outFile << "WristRight_z" << ",";
+	outFile << "HandRight_x" << ",";
+	outFile << "HandRight_y" << ",";
+	outFile << "HandRight_z" << ",";
+	outFile << "HipLeft_x" << ",";
+	outFile << "HipLeft_y" << ",";
+	outFile << "HipLeft_z" << ",";
+	outFile << "KneeLeft_x" << ",";
+	outFile << "KneeLeft_y" << ",";
+	outFile << "KneeLeft_z" << ",";
+	outFile << "AnkleLeft_x" << ",";
+	outFile << "AnkleLeft_y" << ",";
+	outFile << "AnkleLeft_z" << ",";
+	outFile << "FootLeft_x" << ",";
+	outFile << "FootLeft_y" << ",";
+	outFile << "FootLeft_z" << ",";
+	outFile << "HipRight_x" << ",";
+	outFile << "HipRight_y" << ",";
+	outFile << "HipRight_z" << ",";
+	outFile << "KneeRight_x" << ",";
+	outFile << "KneeRight_y" << ",";
+	outFile << "KneeRight_z" << ",";
+	outFile << "AnkleRight_x" << ",";
+	outFile << "AnkleRight_y" << ",";
+	outFile << "AnkleRight_z" << ",";
+	outFile << "FootRight_x" << ",";
+	outFile << "FootRight_y" << ",";
+	outFile << "FootRight_z" << ",";
+	outFile << "SpineShoulder_x" << ",";
+	outFile << "SpineShoulder_y" << ",";
+	outFile << "SpineShoulder_z" << ",";
+	outFile << "HandTipLeft_x" << ",";
+	outFile << "HandTipLeft_y" << ",";
+	outFile << "HandTipLeft_z" << ",";
+	outFile << "ThumbLeft_x" << ",";
+	outFile << "ThumbLeft_y" << ",";
+	outFile << "ThumbLeft_z" << ",";
+	outFile << "HandTipRight_x" << ",";
+	outFile << "HandTipRight_y" << ",";
+	outFile << "HandTipRight_z" << ",";
+	outFile << "ThumbRight_x" << ",";
+	outFile << "ThumbRight_y" << ",";
+	outFile << "ThumbRight_z" << ",";
+	outFile << std::endl;
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -167,6 +252,7 @@ int CColorBasics::Run(HINSTANCE hInstance, int nCmdShow)
 
     }
 
+	outFile.close();
     return static_cast<int>(msg.wParam);
 }
 
@@ -551,12 +637,16 @@ void CColorBasics::ProcessBody(INT64 nTime, int nBodyCount, IBody** ppBodies)
 						hr = pBody->GetJoints(_countof(joints), joints);
 						if (SUCCEEDED(hr))
 						{
+							outFile << FrameNumber << ",";
+							FrameNumber++;
 							for (int j = 0; j < _countof(joints); ++j)
 							{
-								jointPoints[j] = BodyToScreen(joints[j].Position, width, height);
+								//jointPoints[j] = BodyToScreen(joints[j].Position, width, height);
+								OutputJoints(joints[j]);
 							}
+							outFile << std::endl;
 
-							DrawBody(joints, jointPoints);
+							//DrawBody(joints, jointPoints);
 
 							/*DrawHand(leftHandState, jointPoints[JointType_HandLeft]);
 							DrawHand(rightHandState, jointPoints[JointType_HandRight]);*/
@@ -565,45 +655,8 @@ void CColorBasics::ProcessBody(INT64 nTime, int nBodyCount, IBody** ppBodies)
 				}
 			}
 
-			/*hr = m_pRenderTarget->EndDraw();*/
-
-			// Device lost, need to recreate the render target
-			// We'll dispose it now and retry drawing
-			/*if (D2DERR_RECREATE_TARGET == hr)
-			{
-				hr = S_OK;
-				DiscardDirect2DResources();
-			}*/
 		}
 
-		/*if (!m_nStartTime)
-		{
-			m_nStartTime = nTime;
-		}
-
-		double fps = 0.0;
-
-		LARGE_INTEGER qpcNow = { 0 };
-		if (m_fFreq)
-		{
-			if (QueryPerformanceCounter(&qpcNow))
-			{
-				if (m_nLastCounter)
-				{
-					m_nFramesSinceUpdate++;
-					fps = m_fFreq * m_nFramesSinceUpdate / double(qpcNow.QuadPart - m_nLastCounter);
-				}
-			}
-		}
-
-		WCHAR szStatusMessage[64];
-		StringCchPrintf(szStatusMessage, _countof(szStatusMessage), L" FPS = %0.2f    Time = %I64d", fps, (nTime - m_nStartTime));
-
-		if (SetStatusMessage(szStatusMessage, 1000, false))
-		{
-			m_nLastCounter = qpcNow.QuadPart;
-			m_nFramesSinceUpdate = 0;
-		}*/
 	}
 }
 /// <summary>
@@ -809,6 +862,16 @@ D2D1_POINT_2F CColorBasics::BodyToScreen(const CameraSpacePoint& bodyPoint, int 
 }
 
 /// <summary>
+/// Output Joints
+/// </summary>
+/// <param name="pJoints">joint data</param>
+void CColorBasics::OutputJoints(const Joint pJoints)
+{
+	outFile << pJoints.Position.X << ",";
+	outFile << pJoints.Position.Y << ",";
+	outFile << pJoints.Position.Z << ",";
+}
+/// <summary>
 /// Draws a body 
 /// </summary>
 /// <param name="pJoints">joint data</param>
@@ -898,7 +961,10 @@ void CColorBasics::DrawBone(const Joint* pJoints, const D2D1_POINT_2F* pJointPoi
 		//m_pRenderTarget->DrawLine(pJointPoints[joint0], pJointPoints[joint1], m_pBrushBoneTracked, c_TrackedBoneThickness);
 		ofstream myfile;
 		myfile.open("example.txt");
-		myfile << pJointPoints[joint0].x;
+		myfile << pJoints[joint0].Position.X;
+		myfile << pJoints[joint0].Position.Y;
+		myfile << pJoints[joint0].Position.Z;
+		myfile << "WTH is going on";
 		myfile.close();
 	}
 	else
@@ -906,7 +972,10 @@ void CColorBasics::DrawBone(const Joint* pJoints, const D2D1_POINT_2F* pJointPoi
 		//m_pRenderTarget->DrawLine(pJointPoints[joint0], pJointPoints[joint1], m_pBrushBoneInferred, c_InferredBoneThickness);
 		ofstream myfile;
 		myfile.open("example.txt");
-		myfile << pJointPoints[joint0].x;
+		myfile << pJoints[joint0].Position.X;
+		myfile << pJoints[joint0].Position.Y;
+		myfile << pJoints[joint0].Position.Z;
+		myfile << "WTF is going on";
 		myfile.close();
 	}
 }

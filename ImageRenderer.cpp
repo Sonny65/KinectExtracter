@@ -6,7 +6,6 @@
 
 #include "stdafx.h"
 #include "ImageRenderer.h"
-
 /// <summary>
 /// Constructor
 /// </summary>

@@ -1,0 +1,8 @@
+﻿  ColorBasics.cpp
+c:\users\yuhan\downloads\opencv\build\include\opencv2\core\mat.hpp(1965): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\users\yuhan\downloads\opencv\build\include\opencv2\core\persistence.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\users\yuhan\downloads\opencv\build\include\opencv2\core\utility.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\users\yuhan\downloads\opencv\build\include\opencv2\core\utility.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\users\yuhan\desktop\kinectextracter\colorbasics.cpp(364): warning C4805: '==': unsafe mix of type 'boolean' and type 'bool' in operation
+c:\users\yuhan\desktop\kinectextracter\colorbasics.cpp(692): warning C4805: '==': unsafe mix of type 'boolean' and type 'bool' in operation
+  ColorBasics-D2D.vcxproj -> C:\Users\Yuhan\Desktop\KinectExtracter\x64\Debug\ColorBasics-D2D.exe

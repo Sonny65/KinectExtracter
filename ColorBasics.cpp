@@ -8,11 +8,15 @@
 #include <strsafe.h>
 #include "resource.h"
 #include "ColorBasics.h"
+#include "opencv2\highgui\highgui.hpp"
+#include "opencv2/core/core.hpp"
+#include "opencv\cv.hpp"
 #include <typeinfo>
 #include <iostream>
 #include <string>
 #include <fstream>
 using namespace std;
+using namespace cv;
 
 ofstream outFile;  //default IO file. Replaces items in file. If file does not exist creates new file
 
@@ -21,6 +25,7 @@ static const float c_TrackedBoneThickness = 6.0f;
 static const float c_InferredBoneThickness = 1.0f;
 static const float c_HandSize = 30.0f;
 int FrameNumber = 0;
+
 boolean tracked = false;
 
 /// <summary>
@@ -274,6 +279,7 @@ void CColorBasics::Update()
     {
         INT64 nTime = 0;
         IFrameDescription* pFrameDescription = NULL;
+		IBodyFrame* pBodyFrame = NULL;
         int nWidth = 0;
         int nHeight = 0;
         ColorImageFormat imageFormat = ColorImageFormat_None;
@@ -326,12 +332,52 @@ void CColorBasics::Update()
         }
 
         SafeRelease(pFrameDescription);
+
+		if (!m_pBodyFrameReader)
+		{
+			return;
+		}
+
+		hr = m_pBodyFrameReader->AcquireLatestFrame(&pBodyFrame);
+
+		if (SUCCEEDED(hr))
+		{
+
+			IBody* ppBodies[BODY_COUNT] = { 0 };
+
+			if (SUCCEEDED(hr))
+			{
+				hr = pBodyFrame->GetAndRefreshBodyData(_countof(ppBodies), ppBodies);
+			}
+
+			if (SUCCEEDED(hr))
+			{
+				ProcessBody(nTime, BODY_COUNT, ppBodies);
+			}
+
+			for (int i = 0; i < _countof(ppBodies); ++i)
+			{
+				SafeRelease(ppBodies[i]);
+			}
+		}
+
+		if (tracked == true) {
+
+			WCHAR szScreenshotPath[MAX_PATH];
+			// Retrieve the path to My Photos
+			GetScreenshotFileName(szScreenshotPath, _countof(szScreenshotPath));
+
+			// Write out the bitmap to disk
+			//HRESULT hr = SaveBitmapToFile(reinterpret_cast<BYTE*>(pBuffer), nWidth, nHeight, sizeof(RGBQUAD) * 8, szScreenshotPath);
+		}
+
+		SafeRelease(pBodyFrame);
     }
 	
     SafeRelease(pColorFrame);
 
 	// Process BodyFrame
-	if (!m_pBodyFrameReader)
+	/*if (!m_pBodyFrameReader)
 	{
 		return;
 	}
@@ -364,7 +410,7 @@ void CColorBasics::Update()
 		}
 	}
 
-	SafeRelease(pBodyFrame);
+	SafeRelease(pBodyFrame);*/
 }
 
 /// <summary>
@@ -410,6 +456,8 @@ LRESULT CALLBACK CColorBasics::DlgProc(HWND hWnd, UINT message, WPARAM wParam, L
     UNREFERENCED_PARAMETER(wParam);
     UNREFERENCED_PARAMETER(lParam);
 
+
+
     switch (message)
     {
         case WM_INITDIALOG:
@@ -437,6 +485,10 @@ LRESULT CALLBACK CColorBasics::DlgProc(HWND hWnd, UINT message, WPARAM wParam, L
         // If the titlebar X is clicked, destroy app
         case WM_CLOSE:
             DestroyWindow(hWnd);
+
+			//process video
+			Processvideo();
+
             break;
 
         case WM_DESTROY:
@@ -564,7 +616,7 @@ void CColorBasics::ProcessColor(INT64 nTime, RGBQUAD* pBuffer, int nWidth, int n
     {
         // Draw the data with Direct2D
         m_pDrawColor->Draw(reinterpret_cast<BYTE*>(pBuffer), cColorWidth * cColorHeight * sizeof(RGBQUAD));
-		
+
         if (m_bSaveScreenshot)
         {
             WCHAR szScreenshotPath[MAX_PATH];
@@ -637,14 +689,17 @@ void CColorBasics::ProcessBody(INT64 nTime, int nBodyCount, IBody** ppBodies)
 						hr = pBody->GetJoints(_countof(joints), joints);
 						if (SUCCEEDED(hr))
 						{
-							outFile << FrameNumber << ",";
-							FrameNumber++;
-							for (int j = 0; j < _countof(joints); ++j)
-							{
-								//jointPoints[j] = BodyToScreen(joints[j].Position, width, height);
-								OutputJoints(joints[j]);
+							if (tracked == true) {
+								outFile << FrameNumber << ",";
+								FrameNumber++;
+								for (int j = 0; j < _countof(joints); ++j)
+								{
+									//jointPoints[j] = BodyToScreen(joints[j].Position, width, height);
+									OutputJoints(joints[j]);
+								}
+								outFile << std::endl;
 							}
-							outFile << std::endl;
+							tracked = true;
 
 							//DrawBody(joints, jointPoints);
 
@@ -700,7 +755,7 @@ HRESULT CColorBasics::GetScreenshotFileName(_Out_writes_z_(nFilePathSize) LPWSTR
         GetTimeFormatEx(NULL, 0, NULL, L"hh'-'mm'-'ss", szTimeString, _countof(szTimeString));
 
         // File name will be KinectScreenshotColor-HH-MM-SS.bmp
-        StringCchPrintfW(lpszFilePath, nFilePathSize, L"%s\\KinectScreenshot-Color-%s.bmp", pszKnownPath, szTimeString);
+        StringCchPrintfW(lpszFilePath, nFilePathSize, L"%s\\FrameNumber-%d.bmp", pszKnownPath, FrameNumber);
     }
 
     if (pszKnownPath)
@@ -1003,4 +1058,29 @@ void CColorBasics::DrawHand(HandState handState, const D2D1_POINT_2F& handPositi
 		m_pRenderTarget->FillEllipse(ellipse, m_pBrushHandLasso);
 		break;
 	}
+}
+
+/// <summary>
+/// process video
+/// </summary>
+
+int CColorBasics::Processvideo()
+{
+	string imageName;
+	Mat edges;
+	namedWindow("edges", 1);
+
+	for (int i = 0;; i++) {
+		imageName = "RGBstream/FrameNumber-" + std::to_string(i) + ".bmp";
+		Mat image;
+		image = imread(imageName);
+		cvtColor(image, edges, CV_BGR2GRAY);
+		imshow("edges", edges);
+		if (i > 32) {
+			return 0;
+		}
+		if (waitKey(30) >= 0) break;
+	}
+
+	return 0;
 }

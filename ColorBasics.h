@@ -9,6 +9,7 @@
 #include "resource.h"
 #include "ImageRenderer.h"
 
+
 class CColorBasics
 {
     static const int        cColorWidth  = 1920;
@@ -195,5 +196,10 @@ private:
 	/// <param name="joint0">one joint of the bone to draw</param>
 	/// <param name="joint1">other joint of the bone to draw</param>
 	void                    DrawBone(const Joint* pJoints, const D2D1_POINT_2F* pJointPoints, JointType joint0, JointType joint1);
+
+	/// <summary>
+	/// process video
+	/// </summary>
+	int CColorBasics::Processvideo();
 };
 

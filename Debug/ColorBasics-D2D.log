@@ -1,2 +1,4 @@
 ﻿  ColorBasics.cpp
+c:\users\yuhan\desktop\kinectextracter\colorbasics.cpp(359): warning C4805: '==': unsafe mix of type 'boolean' and type 'bool' in operation
+c:\users\yuhan\desktop\kinectextracter\colorbasics.cpp(681): warning C4805: '==': unsafe mix of type 'boolean' and type 'bool' in operation
   ColorBasics-D2D.vcxproj -> C:\Users\Yuhan\Desktop\KinectExtracter\Debug\ColorBasics-D2D.exe

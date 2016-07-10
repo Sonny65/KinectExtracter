@@ -13,7 +13,7 @@
 #include "opencv\cv.hpp"
 #include <typeinfo>
 #include <iostream>
-#include <string>
+#include <cstring>
 #include <fstream>
 using namespace std;
 using namespace cv;
